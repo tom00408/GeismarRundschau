@@ -144,7 +144,6 @@ const Home: React.FC = () => {
 						marginBottom: '3rem',
 						boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
 					}}>
-					
 					<div
 						style={{
 							display: 'flex',
@@ -152,9 +151,7 @@ const Home: React.FC = () => {
 							alignItems: 'center',
 							gap: '2rem',
 						}}>
-
-
-<a
+						<a
 							href={latestIssue.url}
 							target="_blank"
 							rel="noopener noreferrer"
@@ -208,7 +205,6 @@ const Home: React.FC = () => {
 								</div>
 							)}
 						</div>
-						
 					</div>
 				</div>
 			)}
@@ -276,14 +272,13 @@ const Home: React.FC = () => {
 			</div>
 
 			<div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: '4rem',
-      }}
-      >
-            
+				style={{
+					display: 'flex',
+					flexDirection: 'row',
+					justifyContent: 'center',
+					gap: '4rem',
+					flexWrap: 'wrap',
+				}}>
 				<div
 					style={{
 						textAlign: 'center',
@@ -293,13 +288,11 @@ const Home: React.FC = () => {
 						href="https://www.mtvgeismar.de/der-verein/mitgliedschaft/"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="cta-button"
-						>
+						className="cta-button">
 						Unser Fan-Shop
 					</a>
 				</div>
 
- 
 				<div
 					style={{
 						textAlign: 'center',
@@ -351,6 +344,24 @@ const Home: React.FC = () => {
         a:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        @media (max-width: 640px) {
+          .cta-button {
+            width: 100%;
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            padding: 1.2rem 0;
+          }
+          div[style*='flex-direction: row'] > div {
+            width: 100%;
+            padding: 1.2rem 0 !important;
+          }
+          div[style*='flex-direction: row'] {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+            align-items: stretch !important;
+          }
         }
       `}</style>
 		</div>

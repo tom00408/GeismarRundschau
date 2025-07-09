@@ -4,11 +4,15 @@ import { storage } from '../firebase';
 import { colors } from '../styles/colors';
 import PdfPreview from '../components/PdfPreview';
 
+type SortOption = 'newest' | 'oldest';
+
 const Archive: React.FC = () => {
   const [pdfs, setPdfs] = useState<{ name: string; url: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showThumbnails, setShowThumbnails] = useState(true);
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [search, setSearch] = useState('');
   const headerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +64,44 @@ const Archive: React.FC = () => {
     };
     fetchPdfs();
   }, []);
+
+  const sortPdfs = (pdfsToSort: { name: string; url: string }[], sortOption: SortOption) => {
+    const sortedPdfs = [...pdfsToSort];
+    
+    return sortedPdfs.sort((a, b) => {
+      const { year: yearA, quarter: quarterA } = extractYearAndQuarter(a.name);
+      const { year: yearB, quarter: quarterB } = extractYearAndQuarter(b.name);
+      
+      if (sortOption === 'newest') {
+        if (yearB !== yearA) return yearB - yearA;
+        return quarterB - quarterA;
+      } else {
+        if (yearA !== yearB) return yearA - yearB;
+        return quarterA - quarterB;
+      }
+    });
+  };
+
+  const extractYearAndQuarter = (name: string): { year: number, quarter: number } => {
+    // Sucht nach Mustern wie 1986-04 oder 1987-01
+    const match = name.match(/(\d{4})-(\d{2})/);
+    if (match) {
+      return {
+        year: parseInt(match[1], 10),
+        quarter: parseInt(match[2], 10)
+      };
+    }
+    // Fallback: sehr alt
+    return { year: 0, quarter: 0 };
+  };
+
+  const getSortButtonText = (sortOption: SortOption): string => {
+    return sortOption === 'newest' ? 'Neueste zuerst' : 'Älteste zuerst';
+  };
+
+  const toggleSort = () => {
+    setSortBy(sortBy === 'newest' ? 'oldest' : 'newest');
+  };
 
   if (loading) {
     return (
@@ -138,8 +180,9 @@ const Archive: React.FC = () => {
       >
         <div style={{
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           marginBottom: '2rem',
         }}>
           <h2 style={{
@@ -150,30 +193,89 @@ const Archive: React.FC = () => {
           }}>
             Rundschau Ausgaben
           </h2>
-          <button
-            onClick={() => setShowThumbnails(!showThumbnails)}
-            className="toggle-button"
+          <div
             style={{
-              background: showThumbnails ? colors.red : '#e0e0e0',
-              color: showThumbnails ? colors.white : '#666',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: 8,
-              cursor: 'pointer',
               display: 'flex',
+              flexDirection: 'row',
+              gap: '1rem',
               alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              flexWrap: 'wrap',
+              width: '100%',
+              justifyContent: 'flex-end',
+              marginTop: 8,
             }}
+            className="archive-controls"
           >
-            <span style={{ fontSize: '1.2rem' }}>📄</span>
-            {showThumbnails ? 'Vorschaubilder ausblenden' : 'Vorschaubilder anzeigen'}
-          </button>
+            <input
+              type="text"
+              placeholder="Suchen..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: 8,
+                border: '1px solid #ccc',
+                fontSize: '1rem',
+                outline: 'none',
+                minWidth: 160,
+                marginRight: 8,
+              }}
+              className="archive-search"
+            />
+            <button
+              onClick={toggleSort}
+              className="sort-button"
+              style={{
+                background: colors.red,
+                color: colors.white,
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: 8,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                fontSize: '0.9rem',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem' }}>🔄</span>
+              {getSortButtonText(sortBy)}
+            </button>
+            <button
+              onClick={() => setShowThumbnails(!showThumbnails)}
+              className="toggle-button"
+              style={{
+                background: showThumbnails ? colors.red : '#e0e0e0',
+                color: showThumbnails ? colors.white : '#666',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: 8,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              }}
+            >
+              <span style={{ fontSize: '1.2rem' }}>📄</span>
+              {showThumbnails ? 'Vorschaubilder ausblenden' : 'Vorschaubilder anzeigen'}
+            </button>
+          </div>
         </div>
 
         <div className="pdf-grid">
-          {pdfs.map((pdf, index) => (
+          {sortPdfs(
+            pdfs.filter(pdf => {
+              const query = search.toLowerCase();
+              return (
+                pdf.name.toLowerCase().includes(query)
+              );
+            }),
+            sortBy
+          ).map((pdf, index) => (
             <PdfPreview
               key={pdf.name}
               name={pdf.name}
@@ -186,7 +288,8 @@ const Archive: React.FC = () => {
       </div>
 
       <style>{`
-        .toggle-button:hover {
+        .toggle-button:hover,
+        .sort-button:hover {
           transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
@@ -206,6 +309,21 @@ const Archive: React.FC = () => {
         @media (max-width: 640px) {
           .pdf-grid {
             grid-template-columns: 1fr;
+          }
+          .archive-controls {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.5rem !important;
+          }
+          .archive-search {
+            min-width: 0 !important;
+            width: 100% !important;
+            margin-right: 0 !important;
+          }
+          .sort-button, .toggle-button {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 0.8rem 1rem;
           }
         }
       `}</style>
