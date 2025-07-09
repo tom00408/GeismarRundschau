@@ -144,16 +144,7 @@ const Home: React.FC = () => {
 						marginBottom: '3rem',
 						boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
 					}}>
-					<h2
-						style={{
-							color: colors.red,
-							fontSize: '2rem',
-							fontWeight: 700,
-							marginBottom: '1.5rem',
-							textAlign: 'center',
-						}}>
-						Aktuelle Rundschau
-					</h2>
+					
 					<div
 						style={{
 							display: 'flex',
@@ -161,6 +152,25 @@ const Home: React.FC = () => {
 							alignItems: 'center',
 							gap: '2rem',
 						}}>
+
+
+<a
+							href={latestIssue.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							style={{
+								background: `linear-gradient(90deg, ${colors.red} 0%, ${colors.red2} 100%)`,
+								color: colors.white,
+								padding: '1rem 2rem',
+								borderRadius: 12,
+								textDecoration: 'none',
+								fontSize: '1.2rem',
+								fontWeight: 600,
+								boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+								transition: 'all 0.3s ease',
+							}}>
+							Aktuelle Ausgabe öffnen
+						</a>
 						<div
 							style={{
 								width: '100%',
@@ -198,23 +208,7 @@ const Home: React.FC = () => {
 								</div>
 							)}
 						</div>
-						<a
-							href={latestIssue.url}
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								background: `linear-gradient(90deg, ${colors.red} 0%, ${colors.red2} 100%)`,
-								color: colors.white,
-								padding: '1rem 2rem',
-								borderRadius: 12,
-								textDecoration: 'none',
-								fontSize: '1.2rem',
-								fontWeight: 600,
-								boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-								transition: 'all 0.3s ease',
-							}}>
-							Aktuelle Ausgabe öffnen
-						</a>
+						
 					</div>
 				</div>
 			)}
